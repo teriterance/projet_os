@@ -38,6 +38,7 @@ int main(int argc, char * argv[]){
         scanf("%s", choix);
 
         if(strcmp(choix, "Rest") == 0){
+            strcpy(choix, "");
             //on signal a la socket notre choix
             short_m choix = OUI;
             send(socketClient, &choix, sizeof(short_m), 0);
@@ -51,7 +52,7 @@ int main(int argc, char * argv[]){
             //on lui affecte un id par defaut 
             fichier.id = 0;
             //on lui affecte un temps qui est celui de la machine
-            fichier.time = time(NULL);
+            fichier.time = 0;
             //on envoie la structure en question
             send(socketClient, &fichier, sizeof(file_copy), 0);
 
@@ -85,6 +86,7 @@ int main(int argc, char * argv[]){
         }
         else{
             if(strcmp(choix, "Lire") == 0){
+                strcpy(choix, "");
                 //on signal a la socket notre choix
                 short_m choix = NON;
                 send(socketClient, &choix, sizeof(short_m), 0);
@@ -99,10 +101,8 @@ int main(int argc, char * argv[]){
                 //on lui affecte un id par defaut 
                 fichier.id = 0;
                 //on lui affecte un temps qui est celui de la machine
-                fichier.time = 0;
+                fichier.time = time(NULL);
                 send(socketClient, &fichier, sizeof(file_copy), 0);
-                printf("bonjour");
-                int c  = getchar();
 
                 //on attend la reponse du serveur qui est soit 0 oui ce sera possible, soit 1 non impossible
                 short_m reponce;
@@ -112,22 +112,31 @@ int main(int argc, char * argv[]){
                     printf("Impossible d'ecrire ce fichier dans votre repertoire sur le serveur");
                     break;
                 }   
-                //on ensvoi la taille du fichier 
-                //unsigned int f_taille;
-                //send(socketClient, &f_taille,sizeof(unsigned int), 0);
-
-                //on ouvre le fichier en question (en ecriture)
                 FILE *file_out = fopen(fichier.filename, "r");
+                //on ensvoi la taille du fichier 
+                unsigned int f_taille;
+                fseek(file_out,  0L, SEEK_END);
+                f_taille = ftell(file_out);
+                //retour du curseur au debut 
+                fseek(file_out,  0L, SEEK_SET);
+                //on envoie la taille en question 
+                send(socketClient, &f_taille,sizeof(unsigned int), 0);
+                fclose(file_out);
+
+                file_out = fopen(fichier.filename, "r");
+                //on ouvre le fichier en question (en ecriture)
                 char caractere;
                 do{   
                     //on envoi le fichier caractere par caractere
                     caractere = fgetc(file_out);
-                    printf("%c", caractere);
                     send(socketClient, &caractere, sizeof(char), 0);
                 } while ( caractere != EOF );
                 //on a fini l'ecriture donc on ferme le fichier
                 fclose(file_out);
                 printf("la copie du fichier depuis le serveur s'est bien deroule");
+            }else{
+                short_m choix = SOR;
+                send(socketClient, &choix, sizeof(short_m), 0);
             }
         }
         

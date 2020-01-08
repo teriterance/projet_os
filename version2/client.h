@@ -26,4 +26,4 @@ typedef struct FILE_COPY
 }file_copy;
 
 //declaration d'un type pour des messages courts
-typedef enum short_m {OUI, NON} short_m;
+typedef enum short_m {OUI, NON, SOR} short_m;

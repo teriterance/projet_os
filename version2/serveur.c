@@ -2,7 +2,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <time.h>
 
 int main(int argc, char * argv[]){
     //ecrant d'aceuil
@@ -60,6 +59,7 @@ int main(int argc, char * argv[]){
             strcpy(file_loc, user_name);
             strcat(file_loc, "/");
             strcat(file_loc, struct_fichier.filename);
+            
 
             printf("ouverteure du fichier %s/n", file_loc);
             FILE *file_out = fopen(file_loc, "r");
@@ -97,7 +97,14 @@ int main(int argc, char * argv[]){
                 strcat(file_loc, "/");
                 strcat(file_loc, struct_fichier.filename);
                 printf("ouverteure du fichier %s\n", file_loc);
-                
+                //crationd e ;
+;
+                char timeString[9];
+                //rejout de l'heure sur le nom du fichier 
+                strftime(timeString, sizeof(timeString), "%H:%M:%S", gmtime(&struct_fichier.time));
+                strcat(file_loc, "_");
+                strcat(file_loc, timeString);
+
                 //on creai le dossier contenant les ellements du dossier utilisateur
                 char folder_loc[50];
                 strcat(folder_loc, "./");
@@ -105,11 +112,10 @@ int main(int argc, char * argv[]){
 
                 struct stat st = {0};
                 if(stat(folder_loc, &st)){
-                mkdir(folder_loc, 0700);
+                mkdir(folder_loc, 0777);
                 }
-
                 /**On ouvre le fichier**/
-                FILE *file_in = fopen(file_loc, "w");
+                FILE *file_in = fopen(file_loc, "a+");
                 if(file_in !=  NULL){
                     short_m n = OUI;
                     send(socket_service, &n , sizeof(short_m), 0);
@@ -118,11 +124,11 @@ int main(int argc, char * argv[]){
                     short_m n = NON;
                     send(socket_service, &n, sizeof(short_m), 0); 
                 }
-
-
+                
                 //on recois la taille de notre fichier 
-                //unsigned int taille_fichier;
-                //recv(socket_service, &taille_fichier, sizeof(unsigned int), 0);
+                unsigned int taille_fichier;
+                recv(socket_service, &taille_fichier, sizeof(unsigned int), 0);
+                printf("voici la taille du fichir a recevoir%d\n",taille_fichier);
 
                 //on recois notre message
                 //on ouvre le fichier en question (en ecriture)
@@ -130,17 +136,43 @@ int main(int argc, char * argv[]){
                 do{
                     recv(socket_service, &caractere, sizeof(char), 0);
                     printf("%c", caractere);
-                    printf("%c",fputc(caractere, file_in));
+                    if(caractere != EOF)
+                    fprintf(file_in,"%c",caractere);
                 }while(caractere != EOF);
 
                 //on a fini l'ecriture donc on ferme le fichier
                 fclose(file_in);
-                
                 printf("la copie du fichier depuis le serveur s'est bien deroule");
+
+                
+                //supression en cas de doublon de meme version 
+                struct dirent *lecture;
+                DIR *rep;
+                rep = opendir(user_name);
+                while ((lecture = readdir(rep))) {
+                    char ficher_compar[50];
+                    strcpy(ficher_compar, user_name);
+                    strcat(ficher_compar, "/");
+                    strcat(ficher_compar, lecture->d_name);
+                    printf("\n%s %s\n", ficher_compar, file_loc);
+                    int c  = getchar();
+                    if(strcmp(ficher_compar, file_loc) == 0){
+                        if (compareFile(fopen(file_loc, "r"), fopen(ficher_compar, "r")) == 0){
+                            printf("je suprime un doublon");
+                            remove(file_loc);
+                            break;
+                        }
+                    }
+                }
+                
+            }else
+            {
+                /* code */
+                close(socket_service);
             }
+            
         }
     }
-    close(socket_service);
     close(socket_RV);
 
     return EXIT_SUCCESS;
