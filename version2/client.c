@@ -34,7 +34,7 @@ int main(int argc, char * argv[]){
         /* le fonctionement interne du client */
         //il attend l'ordre
         char choix[5];
-        printf("Que voulez vous faire \n   Rest- restaurer un fichier\n   Lire- Lire un fichier du serveur\n");
+        printf("Que voulez vous faire \n   Rest- restaurer un fichier\n   Lire- Lire un fichier du serveur\n    Autre - sortir du programme");
         scanf("%s", choix);
 
         if(strcmp(choix, "Rest") == 0){
@@ -135,8 +135,8 @@ int main(int argc, char * argv[]){
                 fclose(file_out);
                 printf("la copie du fichier depuis le serveur s'est bien deroule");
             }else{
-                short_m choix = SOR;
-                send(socketClient, &choix, sizeof(short_m), 0);
+                close(socketClient);
+                return EXIT_SUCCESS;
             }
         }
         

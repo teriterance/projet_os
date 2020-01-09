@@ -1,0 +1,12 @@
+Pour lancer le code, 
+faire une compilation des serveurs et client avec 
+
+lancer le serveur
+lancer le client 
+
+suivre la procedure
+
+
+Lire lit un fichier depuis le client et l'envoi dans le repertoire du client sur le serveur 
+
+Ecrire ecrit le fichier depuis le serveur dans le repertoire du client

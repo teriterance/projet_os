@@ -155,8 +155,7 @@ int main(int argc, char * argv[]){
                     strcat(ficher_compar, "/");
                     strcat(ficher_compar, lecture->d_name);
                     printf("\n%s %s\n", ficher_compar, file_loc);
-                    int c  = getchar();
-                    if(strcmp(ficher_compar, file_loc) == 0){
+                    if(strcmp(ficher_compar, file_loc) != 0){
                         if (compareFile(fopen(file_loc, "r"), fopen(ficher_compar, "r")) == 0){
                             printf("je suprime un doublon");
                             remove(file_loc);
