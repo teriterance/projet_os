@@ -14,6 +14,7 @@ int main(int argc, char * argv[]){
         perror("socket rendez-vous");
         exit(1);
     }
+
     //initiallisation de l'addresse de connection 
     adr.sin_family=AF_INET;
     adr.sin_port=htons(6543);
@@ -45,6 +46,14 @@ int main(int argc, char * argv[]){
 
     while (1)
     {
+        struct dirent *lecture2;
+        DIR *rep2;
+        rep2 = opendir(user_name);
+        while ((lecture2 = readdir(rep2))) {
+            send(socket_service, lecture2->d_name, 256*sizeof(char),0);
+        }
+        char ficher_tmp[256];
+
         /* boulce infine de focntionnement du programme  */
         short_m choix;
         recv(socket_service, &choix, sizeof(short_m), 0);
@@ -59,9 +68,9 @@ int main(int argc, char * argv[]){
             strcpy(file_loc, user_name);
             strcat(file_loc, "/");
             strcat(file_loc, struct_fichier.filename);
-            
-
             printf("ouverteure du fichier %s/n", file_loc);
+            
+            /**/
             FILE *file_out = fopen(file_loc, "r");
             if(file_out !=  NULL){
                 short_m n = OUI;
@@ -69,7 +78,7 @@ int main(int argc, char * argv[]){
             }
             else{
                 short_m n = NON;
-                send(socket_service, &n, sizeof(short_m), 0); 
+                send(socket_service, &n, sizeof(short_m), 0);
             }
 
             //on lit le fichier et on garde sa taille
@@ -98,8 +107,8 @@ int main(int argc, char * argv[]){
                 strcat(file_loc, struct_fichier.filename);
                 printf("ouverteure du fichier %s\n", file_loc);
                 //crationd e ;
-;
                 char timeString[9];
+
                 //rejout de l'heure sur le nom du fichier 
                 strftime(timeString, sizeof(timeString), "%H:%M:%S", gmtime(&struct_fichier.time));
                 strcat(file_loc, "_");

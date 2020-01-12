@@ -31,14 +31,21 @@ int main(int argc, char * argv[]){
     
     while (1)
     {
+        printf("Voici la liste des fichiers disponible sur le serveur\n");
+        char tmpchar[256];
+        do{
+            recv(socketClient,tmpchar, 256*sizeof(char), 0);
+            printf("%s\n", tmpchar);
+        }while (strcmp(tmpchar, ".") != 0 );
+            
         /* le fonctionement interne du client */
         //il attend l'ordre
         char choix[5];
-        printf("Que voulez vous faire \n   Rest- restaurer un fichier\n   Lire- Lire un fichier du serveur\n    Autre - sortir du programme");
+        printf("Que voulez vous faire \n   Lire- restaurer un fichier\n   Ecrire- Lire un fichier du serveur\n    Autre - sortir du programme\n");
         scanf("%s", choix);
 
-        if(strcmp(choix, "Rest") == 0){
-            strcpy(choix, "");
+        if(strcmp(choix, "Lire") == 0){
+            
             //on signal a la socket notre choix
             short_m choix = OUI;
             send(socketClient, &choix, sizeof(short_m), 0);
@@ -80,13 +87,13 @@ int main(int argc, char * argv[]){
                 if(caractere != EOF)
                 fputc(caractere, file_int);
             }while(caractere != EOF);
+            
             //on a fini l'ecriture donc on ferme le fichier
             fclose(file_int);
             printf("la copie du fichier depuis le serveur s'est bien deroule");
         }
         else{
-            if(strcmp(choix, "Lire") == 0){
-                strcpy(choix, "");
+            if(strcmp(choix, "Ecrire") == 0){
                 //on signal a la socket notre choix
                 short_m choix = NON;
                 send(socketClient, &choix, sizeof(short_m), 0);
@@ -110,7 +117,7 @@ int main(int argc, char * argv[]){
                 if(reponce == NON){
                     //le repertoire de contient pas le fichier, le serveur a trouve une erreur 
                     printf("Impossible d'ecrire ce fichier dans votre repertoire sur le serveur");
-                    break;
+                    continue;
                 }   
                 FILE *file_out = fopen(fichier.filename, "r");
                 //on ensvoi la taille du fichier 
@@ -142,6 +149,5 @@ int main(int argc, char * argv[]){
         
     }
     close(socketClient);
-    
     return EXIT_SUCCESS;
 }
